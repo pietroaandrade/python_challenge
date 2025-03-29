@@ -4,8 +4,6 @@ class patient_data(BaseModel):
     name: str
     health_insurance: str
 
-
-
 patients = {
 
 }
