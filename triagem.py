@@ -9,9 +9,37 @@ class PatientData(BaseModel):
 patients = {
 }
 
-waiting_queue = []
+seguros = {
+    1 : "Porto Seguro",
+    2 : "Bradesco",
+    3 : "Amil",
+    4 : "SulAmérica",
+    5 : "Unimed"
+}
 
-def create_paciente():
+def forca_opcao(msg, dic):
+    print("Seguros que aceitamos:" "\n")
+    for key in dic.keys():
+        data = dic[key]
+        print(f"- {data}" )
+    
+    opcao = input(f"{msg}\n\n->")
+    while opcao not in dic.values():
+         print("Opção inválida! Por favor, escolha um nome de seguro válido.")
+         opcao = input(f"{msg}\n\n->")
+
+    return opcao
+
+
+def forca_opcaoooo(msg,opcoes):
+    possibilidades = '\n'.join(opcoes)
+    opcao = input(f"{msg}\n{possibilidades}\n->")
+    while opcao not in opcoes:
+        print("Opção inválida!")
+        opcao = input(f"{msg}\n{possibilidades}\n->")
+    return opcao
+
+def create_pacient():
     print(f"Patients in patients list: {patients}")
 
     while True:
@@ -24,7 +52,7 @@ def create_paciente():
         print("Invalid ID. Please enter a numeric value.")
 
     name_input = input("Enter Name: ")
-    insurance_input = input("Enter Insurance: ")
+    insurance_input = forca_opcao("Qual é o seu seguro?", seguros)
     symptoms_input = input("Enter Symptoms: ")
 
     try:
@@ -34,7 +62,6 @@ def create_paciente():
             symptoms=symptoms_input
         )
         patients[id_input] = patient_data.model_dump()
-        waiting_queue.append(id_input)
         print("Patient added successfully!")
         print(patients)
     except ValidationError as e:
@@ -42,15 +69,6 @@ def create_paciente():
 
     return patients
 
-def waiting_line():
-    create_paciente()
-    if not waiting_queue:
-        print("No patients in the waiting line.")
-        return
-
-    next_patient_id = waiting_queue.pop(0)  # Use list pop(0) instead of deque.popleft()
-    print(f"Next patient to be attended: {patients[next_patient_id]['name']}")
-    del patients[next_patient_id]
 
 def get_patient(patient_id):
     if patient_id not in patients:
@@ -59,3 +77,4 @@ def get_patient(patient_id):
         data = patients[patient_id]
         print(f"ID: {id}, Name: {data['name']}, Insurance: {data['insurance']}, Symptoms: {data['symptoms']}")
 
+create_pacient()
