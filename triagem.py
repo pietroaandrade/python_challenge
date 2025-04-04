@@ -17,6 +17,10 @@ seguros = {
     5 : "Unimed"
 }
 
+espera = {
+
+}
+
 def forca_opcao(msg, dic):
     print("Seguros que aceitamos:" "\n")
     for key in dic.keys():
@@ -31,13 +35,6 @@ def forca_opcao(msg, dic):
     return opcao
 
 
-def forca_opcaoooo(msg,opcoes):
-    possibilidades = '\n'.join(opcoes)
-    opcao = input(f"{msg}\n{possibilidades}\n->")
-    while opcao not in opcoes:
-        print("Opção inválida!")
-        opcao = input(f"{msg}\n{possibilidades}\n->")
-    return opcao
 
 def create_pacient():
     print(f"Patients in patients list: {patients}")
@@ -78,3 +75,13 @@ def get_patient(patient_id):
         print(f"ID: {id}, Name: {data['name']}, Insurance: {data['insurance']}, Symptoms: {data['symptoms']}")
 
 create_pacient()
+
+def waiting_line(dic, dic_2):
+    for patient in dic.keys():
+        data = dic.values()
+        dic_2[patient] = data
+    print(dic)
+    return
+
+
+waiting_line(patients, espera)
