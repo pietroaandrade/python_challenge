@@ -1,87 +1,122 @@
+#Importante: Criar funcao de urgencia para triagem
+#Importante: Criar funcao de temperatura para urgencia
+#Importante: Criar funcao de Observar fila
+#Importante: Criar funcao de Criar laudo
+#importante: criar funcao de acessar laudo
+
+
 from pydantic import BaseModel, ValidationError
 
 class PatientData(BaseModel):
     name: str
     insurance: str
     symptoms: str
+    temperature: int
 
-
+next_id = 1
 patients = {
 }
 
-seguros = {
-    1 : "Porto Seguro",
-    2 : "Bradesco",
-    3 : "Amil",
-    4 : "SulAmérica",
-    5 : "Unimed"
-}
+seguros = ["Porto Seguro", "Bradesco", "Amil", "SulAmérica", "Unimed"]
 
-espera = {
+espera = []
 
-}
-
-def forca_opcao(msg, dic):
-    print("Seguros que aceitamos:" "\n")
-    for key in dic.keys():
-        data = dic[key]
-        print(f"- {data}" )
-    
-    opcao = input(f"{msg}\n\n->")
-    while opcao not in dic.values():
-         print("Opção inválida! Por favor, escolha um nome de seguro válido.")
-         opcao = input(f"{msg}\n\n->")
-
+def forca_opcao(msg, lista_opcoes,msg_erro = 'Inválido'):
+    opcoes = '\n'.join(lista_opcoes)
+    opcao = input(f"{msg}\n{opcoes}\n->")
+    while opcao not in lista_opcoes:
+        print(msg_erro)
+        opcao = input(f"{msg}\n{opcoes}\n->")
     return opcao
 
 
+def forca_num(msg):
+    num = input(msg)
+    if not num.isnumeric():
+        print("Deve ser um número!")
+        num = forca_num(msg)
+    return int(num)
 
 def create_pacient():
+    global next_id
+
     print(f"Patients in patients list: {patients}")
 
-    while True:
-        id_input = input("Enter ID (integer): ")
-        if id_input.isnumeric():
-            if id_input in patients:
-                print("ID already exists. Try another.")
-                continue
-            break
-        print("Invalid ID. Please enter a numeric value.")
+    id_input = next_id
+    next_id += 1
 
-    name_input = input("Enter Name: ")
-    insurance_input = forca_opcao("Qual é o seu seguro?", seguros)
-    symptoms_input = input("Enter Symptoms: ")
+    name_input = input("Qual seu nome?")
+    insurance_input = forca_opcao("Qual é o seu convênio?", seguros)
+    symptoms_input = input("Sintomas do paciente: ")
+    temp_input = forca_num("Temperatura paciente:")
 
     try:
         patient_data = PatientData(
-            name=name_input,
-            insurance=insurance_input,
-            symptoms=symptoms_input
+            name = name_input,
+            insurance = insurance_input,
+            symptoms = symptoms_input,
+            temperature = temp_input
         )
         patients[id_input] = patient_data.model_dump()
+        espera.append((patients[id_input]["name"], patients[id_input]["symptoms"]))
         print("Patient added successfully!")
         print(patients)
     except ValidationError as e:
         print("Invalid data:", e)
-
-    return patients
-
-
-def get_patient(patient_id):
-    if patient_id not in patients:
-        print("Patient not found")
-    else:
-        data = patients[patient_id]
-        print(f"ID: {id}, Name: {data['name']}, Insurance: {data['insurance']}, Symptoms: {data['symptoms']}")
-
-create_pacient()
-
-def waiting_line(dic, dic_2):
-    for patient in dic.keys():
-        data = dic.values()
-        dic_2[patient] = data
-    print(dic)
+    acao = forca_opcao("O que deseja fazer?", acoes_funcionario.keys())
+    acoes_funcionario[acao]()
     return
 
 
-waiting_line(patients, espera)
+
+def get_patient():
+    while True:
+        id = forca_num("Qual é o ID do paciente desejado?")
+        if id not in patients:
+            print("Paciente não encontrado")
+        data = patients[id]
+        print(f"ID: {id}, Name: {data['name']}, Insurance: {data['insurance']}, Symptoms: {data['symptoms']}, temperatura: {data['temperature']}ºC")
+        break
+    return
+
+
+def retrieve_line(espera):
+    if not espera:
+        print("Não há pacientes na fila de espera.")
+        return None
+
+    proximo_paciente = espera.pop(0)
+    nome, sintomas = proximo_paciente
+
+    print(f"Chamando o próximo paciente da fila:")
+    print(f"🟢 Nome: {nome}\n🩺 Sintomas: {sintomas}")
+    print(f"Pacientes restantes na fila: {len(espera)}")
+
+    return proximo_paciente
+
+
+
+
+
+
+acoes_funcionario = {
+    "Cadastrar paciente" : create_pacient,
+    "Buscar paciente" : get_patient,
+    "Chamar paciente" : retrieve_line
+}
+acoes_paciente = {
+    "Ver fila de espera" : retrieve_line
+}
+print('Iniciando sistema CareLine')
+
+
+
+user_type = forca_opcao("Qual seu papel?", ["Funcionario", "Paciente"])
+if user_type == "Funcionario":
+    acao = forca_opcao("O que deseja fazer?", acoes_funcionario.keys())
+    acoes_funcionario[acao]()
+else:
+    print("Bem vindo à CareLine, vamos coletar suas informações para acelerar o processo do seu atendimento")
+    nome = input("Qual seu nome? \n -->")
+    convenio = forca_opcao("Qual é o seu convênio?", seguros)
+
