@@ -95,28 +95,45 @@ def retrieve_line(espera):
     return proximo_paciente
 
 
+def menu_funcionario():
+    while True:
+        acao = forca_opcao("O que deseja fazer?", acoes_funcionario.keys())
+        resultado = acoes_funcionario[acao]()
+        if resultado == "sair":
+            break
 
+def menu_paciente():
+    print("Bem vindo à CareLine, vamos coletar suas informações para acelerar o processo do seu atendimento")
+    nome = input("Qual seu nome? \n -->")
+    convenio = forca_opcao("Qual é o seu convênio?", seguros)
+    while True:
+        acao = forca_opcao("O que deseja fazer?", acoes_paciente.keys())
+        resultado = acoes_funcionario[acao]()
+        if resultado == "sair":
+            break
 
-
+def sair():
+    print("Saindo do menu atual...\n")
+    return "sair"
 
 acoes_funcionario = {
     "Cadastrar paciente" : create_pacient,
     "Buscar paciente" : get_patient,
-    "Chamar paciente" : retrieve_line
+    "Chamar paciente" : retrieve_line,
+    "Sair" : sair
 }
 acoes_paciente = {
-    "Ver fila de espera" : retrieve_line
+    "Ver fila de espera" : retrieve_line,
+    "Sair" : sair
 }
-print('Iniciando sistema CareLine')
-
-
-
-user_type = forca_opcao("Qual seu papel?", ["Funcionario", "Paciente"])
-if user_type == "Funcionario":
-    acao = forca_opcao("O que deseja fazer?", acoes_funcionario.keys())
-    acoes_funcionario[acao]()
-else:
-    print("Bem vindo à CareLine, vamos coletar suas informações para acelerar o processo do seu atendimento")
-    nome = input("Qual seu nome? \n -->")
-    convenio = forca_opcao("Qual é o seu convênio?", seguros)
+while True:
+    print('Iniciando sistema CareLine')
+    user_type = forca_opcao("Qual seu papel?", ["Funcionario", "Paciente", "Encerrar sistema"])
+    if user_type == "Funcionario":
+        menu_funcionario()
+    elif user_type == "Paciente":
+        menu_paciente()
+    else:
+        print("Encerrando sistema...")
+        break
 
