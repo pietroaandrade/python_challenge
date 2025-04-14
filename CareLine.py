@@ -9,7 +9,7 @@ from pydantic import BaseModel, ValidationError
 
 
 class PatientData(BaseModel):
-    name: str
+    name: str          
     insurance: str
     symptoms: str
     temperature: int
@@ -31,13 +31,12 @@ espera = []
 
 
 def forca_opcao(msg, lista_opcoes, msg_erro='Inválido'):
-    opcoes = '\n'.join(lista_opcoes).lower()
+    opcoes = '\n'.join(lista_opcoes)
     opcao = input(f"{msg}\n{opcoes}\n->").lower()
     while opcao not in lista_opcoes:
         print(msg_erro)
         opcao = input(f"{msg}\n{opcoes}\n->").lower()
     return opcao
-
 
 def forca_num(msg):
     num = input(msg)
@@ -46,6 +45,16 @@ def forca_num(msg):
         num = forca_num(msg)
     return int(num)
 
+def print_patient(id, dic):
+    data = dic[id]
+    print(f"""
+📄 Dados do Paciente:
+🆔 ID: {id}
+👤 Nome: {data['name']}
+🏥 Convênio: {data['insurance']}
+🤒 Sintomas: {data['symptoms']}
+🌡️ Temperatura: {data['temperature']}ºC
+""")
 
 def create_patient():
     global next_id
@@ -57,7 +66,7 @@ def create_patient():
     next_id += 1
     name_input, insurance_input = espera_cadastro["nome"], espera_cadastro["convenio"]
     symptoms_input = input("Sintomas do paciente: ")
-    temp_input = forca_num("Temperatura paciente:")
+    temp_input = forca_num("Temperatura paciente: ")
 
     try:
         patient_data = PatientData(
@@ -69,7 +78,8 @@ def create_patient():
         patients[id_input] = patient_data.model_dump()
         espera.append((patients[id_input]["name"], id_input))
         print("Patient added successfully!")
-        print(patients)
+        
+        print_patient(id_input, patients)
 
         for key in espera_cadastro.keys():
             espera_cadastro[key] = ""
@@ -86,9 +96,7 @@ def get_patient():
         if id not in patients:
             print("Paciente não encontrado")
             continue
-        data = patients[id]
-        print(f"ID: {id}, Name: {data['name']}, Insurance: {data['insurance']}, Symptoms: {data['symptoms']}, temperatura: {data['temperature']}ºC")
-        break
+        print_patient(id, patients)
     return
 
 
@@ -120,7 +128,7 @@ def retrieve_line_paciente():
 
 def menu_funcionario():
     while True:
-        acao = forca_opcao("O que deseja fazer?", acoes_funcionario.keys())
+        acao = forca_opcao("\nO que deseja fazer?", acoes_funcionario.keys())
         resultado = acoes_funcionario[acao]()
         if resultado == "sair":
             break
@@ -133,7 +141,7 @@ def menu_paciente():
     espera_cadastro["nome"],espera_cadastro["convenio"] = nome, convenio
     print(f"Obrigado, {nome}. Aguarde, você será chamado pelo atendente.")
     while True:
-        acao = forca_opcao("O que deseja fazer?", acoes_paciente.keys())
+        acao = forca_opcao("\nO que deseja fazer?", acoes_paciente.keys())
         resultado = acoes_paciente[acao]()
         if resultado == "sair":
             break
