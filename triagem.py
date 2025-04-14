@@ -1,11 +1,13 @@
-#Importante: Criar funcao de urgencia para triagem
-#Importante: Criar funcao de temperatura para urgencia
-#Importante: Criar funcao de Observar fila
-#Importante: Criar funcao de Criar laudo
-#importante: criar funcao de acessar laudo
-#Importante: Espera cadastro certo
+# Importante: Criar funcao de urgencia para triagem
+# Importante: Criar funcao de temperatura para urgencia
+# Importante: Criar funcao de Observar fila
+# Importante: Criar funcao de Criar laudo
+# importante: criar funcao de acessar laudo
+# Importante: Espera cadastro certo
+# Importante: melhorar prints dic
 
 from pydantic import BaseModel, ValidationError
+
 
 class PatientData(BaseModel):
     name: str
@@ -13,12 +15,12 @@ class PatientData(BaseModel):
     symptoms: str
     temperature: int
 
+
 next_id = 1
-ultimo_paciente_info = None
 
 espera_cadastro = {
-    "nome" : "",
-    "convenio" :""
+    "nome": "",
+    "convenio": ""
 
 }
 patients = {
@@ -28,7 +30,8 @@ seguros = ["Porto Seguro", "Bradesco", "Amil", "SulAmérica", "Unimed"]
 
 espera = []
 
-def forca_opcao(msg, lista_opcoes,msg_erro = 'Inválido'):
+
+def forca_opcao(msg, lista_opcoes, msg_erro='Inválido'):
     opcoes = '\n'.join(lista_opcoes)
     opcao = input(f"{msg}\n{opcoes}\n->")
     while opcao not in lista_opcoes:
@@ -44,27 +47,28 @@ def forca_num(msg):
         num = forca_num(msg)
     return int(num)
 
+
 def create_patient():
     global next_id
-    global ultimo_paciente_info
 
-    if not ultimo_paciente_info:
-        print("Nenhum dado do paciente disponível. Aguarde o paciente preencher o nome e convênio.")
-        return
+    for key in espera_cadastro.keys():
+        if key.values() == "":
+            print("Nenhum dado do paciente disponível. Aguarde o paciente preencher o nome e convênio.")
+            return
 
     id_input = next_id
     next_id += 1
 
-    name_input, insurance_input = ultimo_paciente_info
+    name_input, insurance_input = espera_cadastro["nome"], espera_cadastro["convenio"]
     symptoms_input = input("Sintomas do paciente: ")
     temp_input = forca_num("Temperatura paciente:")
 
     try:
         patient_data = PatientData(
-            name = name_input,
-            insurance = insurance_input,
-            symptoms = symptoms_input,
-            temperature = temp_input
+            name=name_input,
+            insurance=insurance_input,
+            symptoms=symptoms_input,
+            temperature=temp_input
         )
         patients[id_input] = patient_data.model_dump()
         espera.append((patients[id_input]["name"], id_input))
@@ -79,7 +83,6 @@ def create_patient():
     return
 
 
-
 def get_patient():
     while True:
         id = forca_num("Qual é o ID do paciente desejado?")
@@ -87,7 +90,8 @@ def get_patient():
             print("Paciente não encontrado")
             continue
         data = patients[id]
-        print(f"ID: {id}, Name: {data['name']}, Insurance: {data['insurance']}, Symptoms: {data['symptoms']}, temperatura: {data['temperature']}ºC")
+        print(
+            f"ID: {id}, Name: {data['name']}, Insurance: {data['insurance']}, Symptoms: {data['symptoms']}, temperatura: {data['temperature']}ºC")
         break
     return
 
@@ -114,6 +118,7 @@ def menu_funcionario():
         if resultado == "sair":
             break
 
+
 def menu_paciente():
     global ultimo_paciente_info
 
@@ -121,9 +126,8 @@ def menu_paciente():
     nome = input("Qual seu nome? \n -->")
     convenio = forca_opcao("Qual é o seu convênio?", seguros)
 
-
-    ultimo_paciente_info = (nome, convenio)
-
+    espera_cadastro["nome"] = nome
+    espera_cadastro["convenio"] = convenio
 
     print(f"Obrigado, {nome}. Aguarde, você será chamado pelo atendente.")
     while True:
@@ -133,19 +137,21 @@ def menu_paciente():
             break
     return
 
+
 def sair():
     print("Saindo do menu atual...\n")
     return "sair"
 
+
 acoes_funcionario = {
-    "Cadastrar paciente" : create_patient,
-    "Buscar paciente" : get_patient,
-    "Chamar paciente" : retrieve_line,
-    "Sair" : sair
+    "Cadastrar paciente": create_patient,
+    "Buscar paciente": get_patient,
+    "Chamar paciente": retrieve_line,
+    "Sair": sair
 }
 acoes_paciente = {
-    "Ver fila de espera" : retrieve_line,
-    "Sair" : sair
+    "Ver fila de espera": retrieve_line,
+    "Sair": sair
 }
 while True:
     print('Iniciando sistema CareLine')
