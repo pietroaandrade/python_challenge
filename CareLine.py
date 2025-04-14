@@ -1,9 +1,9 @@
 # Importante: Criar funcao de urgencia para triagem
 # Importante: Criar funcao de temperatura para urgencia
-# Importante: Criar funcao de Observar fila
+
 # Importante: Criar funcao de Criar laudo
 # importante: criar funcao de acessar laudo
-# Importante: melhorar prints dic
+
 
 from pydantic import BaseModel, ValidationError
 
@@ -14,14 +14,12 @@ class PatientData(BaseModel):
     symptoms: str
     temperature: int
 
-
 next_id = 1
-
 espera_cadastro = {
     "nome": "",
     "convenio": ""
-
 }
+
 patients = {
 }
 
@@ -67,7 +65,6 @@ def create_patient():
     name_input, insurance_input = espera_cadastro["nome"], espera_cadastro["convenio"]
     symptoms_input = input("Sintomas do paciente: ")
     temp_input = forca_num("Temperatura paciente: ")
-
     try:
         patient_data = PatientData(
             name=name_input,
@@ -75,20 +72,19 @@ def create_patient():
             symptoms=symptoms_input,
             temperature=temp_input
         )
-        patients[id_input] = patient_data.model_dump()
+        patients[id_input] = {
+            **patient_data.model_dump(),
+            "report" : {"Laudo": "", "Receita": "", "Mensagem": ""}
+        }
         espera.append((patients[id_input]["name"], id_input))
         print("Patient added successfully!")
-        
         print_patient(id_input, patients)
-
         for key in espera_cadastro.keys():
             espera_cadastro[key] = ""
 
     except ValidationError as e:
         print("Invalid data:", e)
-
     return
-
 
 def get_patient():
     while True:
@@ -97,6 +93,40 @@ def get_patient():
             print("Paciente não encontrado")
             continue
         print_patient(id, patients)
+    return
+
+def create_report():
+    id = forca_num("Qual é o ID do paciente desejado?")
+    if id not in patients:
+        print("Paciente não encontrado")
+        create_report()
+    else:
+        print(f"\nPreenchendo relatório do paciente {patients[id]['name']}:")
+        
+        laudo = input("Insira o laudo do paciente: \n -->")
+        receita = input("Insira a receita do paciente: \n -->")
+        mensagem = input("Insira a descrição: \n -->")
+
+        patients[id]["report"]["Laudo"] = laudo
+        patients[id]["report"]["Receita"] = receita
+        patients[id]["report"]["Mensagem"] = mensagem
+    return
+
+def see_report():
+    id = forca_num("Digite seu número de paciente para ver o relatório: ")
+    if id not in patients:
+        print("Paciente não encontrado.")
+        see_report()
+    elif patients[id]["report"]["Laudo"] == "":
+        print("Diagnóstico não preenchido.")
+
+    report = patients[id]["report"]
+    print(f"""
+        📄 Relatório Médico:
+        🧪 Laudo: {report['Laudo']}
+        💊 Receita: {report['Receita']}
+        📬 Mensagem do funcionário: {report['Mensagem']}
+        """)
     return
 
 
@@ -112,6 +142,7 @@ def retrieve_line_funcionario():
 
     return proximo_paciente
 
+
 def retrieve_line_paciente():
     if not espera:
         print("Não Há pacientes cadastrados para a fila de espera. Aguarde ser chamado pela triagem.")
@@ -124,6 +155,11 @@ def retrieve_line_paciente():
         print(f"Pacientes restantes na fila: {len(espera)}")
 
     return proximo_paciente
+
+
+def sair():
+    print("Saindo do menu atual...\n")
+    return "sair"
 
 
 def menu_funcionario():
@@ -148,19 +184,19 @@ def menu_paciente():
     return
 
 
-def sair():
-    print("Saindo do menu atual...\n")
-    return "sair"
+
 
 
 acoes_funcionario = {
     "cadastrar paciente": create_patient,
     "buscar paciente": get_patient,
     "chamar paciente": retrieve_line_funcionario,
+    "diagnostico" : create_report,
     "sair": sair
 }
 acoes_paciente = {
     "ver fila": retrieve_line_paciente,
+    "ver diagnostico" : see_report,
     "sair": sair
 }
 while True:
