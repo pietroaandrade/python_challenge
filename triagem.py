@@ -3,7 +3,7 @@
 #Importante: Criar funcao de Observar fila
 #Importante: Criar funcao de Criar laudo
 #importante: criar funcao de acessar laudo
-
+#Importante: Espera cadastro certo
 
 from pydantic import BaseModel, ValidationError
 
@@ -16,6 +16,11 @@ class PatientData(BaseModel):
 next_id = 1
 ultimo_paciente_info = None
 
+espera_cadastro = {
+    "nome" : "",
+    "convenio" :""
+
+}
 patients = {
 }
 
@@ -115,7 +120,11 @@ def menu_paciente():
     print("Bem vindo à CareLine, vamos coletar suas informações para acelerar o processo do seu atendimento")
     nome = input("Qual seu nome? \n -->")
     convenio = forca_opcao("Qual é o seu convênio?", seguros)
+
+
     ultimo_paciente_info = (nome, convenio)
+
+
     print(f"Obrigado, {nome}. Aguarde, você será chamado pelo atendente.")
     while True:
         acao = forca_opcao("O que deseja fazer?", acoes_paciente.keys())
