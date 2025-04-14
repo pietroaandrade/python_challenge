@@ -42,6 +42,13 @@ def forca_num(msg):
         print("Deve ser um número!")
         num = forca_num(msg)
     return int(num)
+def forca_input(msg):
+    resposta = input(msg).strip()
+    while not resposta:
+        print("Campo obrigatório. Por favor, preencha.")
+        resposta = input(msg).strip()
+    return resposta
+
 
 def print_patient(id, dic):
     data = dic[id]
@@ -103,32 +110,31 @@ def create_report():
     else:
         print(f"\nPreenchendo relatório do paciente {patients[id]['name']}:")
         
-        laudo = input("Insira o laudo do paciente: \n -->")
-        receita = input("Insira a receita do paciente: \n -->")
-        mensagem = input("Insira a descrição: \n -->")
+        laudo = forca_input("Insira o laudo do paciente: \n -->")
+        receita = forca_input("Insira a receita do paciente: \n -->")
+        mensagem = forca_input("Insira a descrição: \n -->")
 
         patients[id]["report"]["Laudo"] = laudo
         patients[id]["report"]["Receita"] = receita
         patients[id]["report"]["Mensagem"] = mensagem
     return
 
-def see_report():
+def access_report():
     id = forca_num("Digite seu número de paciente para ver o relatório: ")
     if id not in patients:
         print("Paciente não encontrado.")
-        see_report()
-    elif patients[id]["report"]["Laudo"] == "":
-        print("Diagnóstico não preenchido.")
-
+        return
     report = patients[id]["report"]
+    if report["Laudo"] == "" and report["Receita"] == "" and report["Mensagem"] == "":
+        print("⚠O relatório ainda não foi preenchido. Aguarde o atendimento.")
+        return
     print(f"""
-        📄 Relatório Médico:
-        🧪 Laudo: {report['Laudo']}
-        💊 Receita: {report['Receita']}
-        📬 Mensagem do funcionário: {report['Mensagem']}
-        """)
+📄 Relatório Médico do Paciente {patients[id]['name']}:
+🧪 Laudo: {report['Laudo']}
+💊 Receita: {report['Receita']}
+📬 Mensagem do funcionário: {report['Mensagem']}
+    """)
     return
-
 
 def retrieve_line_funcionario():
     if not espera:
@@ -196,7 +202,7 @@ acoes_funcionario = {
 }
 acoes_paciente = {
     "ver fila": retrieve_line_paciente,
-    "ver diagnostico" : see_report,
+    "ver diagnostico" : access_report,
     "sair": sair
 }
 while True:
