@@ -3,7 +3,6 @@
 # Importante: Criar funcao de Observar fila
 # Importante: Criar funcao de Criar laudo
 # importante: criar funcao de acessar laudo
-# Importante: Espera cadastro certo
 # Importante: melhorar prints dic
 
 from pydantic import BaseModel, ValidationError
@@ -26,17 +25,17 @@ espera_cadastro = {
 patients = {
 }
 
-seguros = ["Porto Seguro", "Bradesco", "Amil", "SulAmérica", "Unimed"]
+seguros = ["porto seguro", "bradesco", "amil", "sulamérica", "unimed"]
 
 espera = []
 
 
 def forca_opcao(msg, lista_opcoes, msg_erro='Inválido'):
-    opcoes = '\n'.join(lista_opcoes)
-    opcao = input(f"{msg}\n{opcoes}\n->")
+    opcoes = '\n'.join(lista_opcoes).lower()
+    opcao = input(f"{msg}\n{opcoes}\n->").lower()
     while opcao not in lista_opcoes:
         print(msg_erro)
-        opcao = input(f"{msg}\n{opcoes}\n->")
+        opcao = input(f"{msg}\n{opcoes}\n->").lower()
     return opcao
 
 
@@ -52,7 +51,7 @@ def create_patient():
     global next_id
 
     for key in espera_cadastro.keys():
-        if key.values() == "":
+        if espera_cadastro[key] == "":
             print("Nenhum dado do paciente disponível. Aguarde o paciente preencher o nome e convênio.")
             return
 
@@ -75,7 +74,8 @@ def create_patient():
         print("Patient added successfully!")
         print(patients)
 
-        ultimo_paciente_info = None
+        for key in espera_cadastro.keys():
+            espera_cadastro[key] = ""
 
     except ValidationError as e:
         print("Invalid data:", e)
@@ -96,7 +96,7 @@ def get_patient():
     return
 
 
-def retrieve_line():
+def retrieve_line_funcionario():
     if not espera:
         print("Não há pacientes na fila de espera.")
         return None
@@ -107,6 +107,19 @@ def retrieve_line():
     print(f"Chamando o próximo paciente da fila:")
     print(f"🟢 Nome: {nome}\n🩺 Numero: {id}")
     print(f"Pacientes restantes na fila: {len(espera)}")
+
+    return proximo_paciente
+
+def retrieve_line_user():
+    if not espera:
+        print("Não Há pacientes cadastrados para a fila de espera. Aguarde ser chamado pela triagem.")
+        return None
+
+    else:
+        proximo_paciente = espera
+        nome, id = proximo_paciente
+        print(f"🟢 Próximo paciente da fila \n --> Numero: {id}")
+        print(f"Pacientes restantes na fila: {len(espera)}")
 
     return proximo_paciente
 
@@ -144,22 +157,22 @@ def sair():
 
 
 acoes_funcionario = {
-    "Cadastrar paciente": create_patient,
-    "Buscar paciente": get_patient,
-    "Chamar paciente": retrieve_line,
-    "Sair": sair
+    "cadastrar paciente": create_patient,
+    "buscar paciente": get_patient,
+    "chamar paciente": retrieve_line_funcionario,
+    "sair": sair
 }
 acoes_paciente = {
-    "Ver fila de espera": retrieve_line,
-    "Sair": sair
+    "ver fila": retrieve_line_user,
+    "sair": sair
 }
 while True:
     print('Iniciando sistema CareLine')
     print(f"[DEBUG] Pacientes salvos: {patients}")
-    user_type = forca_opcao("Qual seu papel?", ["Funcionario", "Paciente", "Encerrar sistema"])
-    if user_type == "Funcionario":
+    user_type = forca_opcao("Qual seu papel?", ["funcionario", "paciente", "encerrar sistema"])
+    if user_type == "funcionario":
         menu_funcionario()
-    elif user_type == "Paciente":
+    elif user_type == "paciente":
         menu_paciente()
     else:
         print("Encerrando sistema...")
