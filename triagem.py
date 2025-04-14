@@ -49,15 +49,12 @@ def forca_num(msg):
 
 def create_patient():
     global next_id
-
     for key in espera_cadastro.keys():
         if espera_cadastro[key] == "":
             print("Nenhum dado do paciente disponível. Aguarde o paciente preencher o nome e convênio.")
             return
-
     id_input = next_id
     next_id += 1
-
     name_input, insurance_input = espera_cadastro["nome"], espera_cadastro["convenio"]
     symptoms_input = input("Sintomas do paciente: ")
     temp_input = forca_num("Temperatura paciente:")
@@ -90,8 +87,7 @@ def get_patient():
             print("Paciente não encontrado")
             continue
         data = patients[id]
-        print(
-            f"ID: {id}, Name: {data['name']}, Insurance: {data['insurance']}, Symptoms: {data['symptoms']}, temperatura: {data['temperature']}ºC")
+        print(f"ID: {id}, Name: {data['name']}, Insurance: {data['insurance']}, Symptoms: {data['symptoms']}, temperatura: {data['temperature']}ºC")
         break
     return
 
@@ -100,17 +96,15 @@ def retrieve_line_funcionario():
     if not espera:
         print("Não há pacientes na fila de espera.")
         return None
-
     proximo_paciente = espera.pop(0)
     nome, id = proximo_paciente
-
     print(f"Chamando o próximo paciente da fila:")
     print(f"🟢 Nome: {nome}\n🩺 Numero: {id}")
     print(f"Pacientes restantes na fila: {len(espera)}")
 
     return proximo_paciente
 
-def retrieve_line_user():
+def retrieve_line_paciente():
     if not espera:
         print("Não Há pacientes cadastrados para a fila de espera. Aguarde ser chamado pela triagem.")
         return None
@@ -133,15 +127,10 @@ def menu_funcionario():
 
 
 def menu_paciente():
-    global ultimo_paciente_info
-
     print("Bem vindo à CareLine, vamos coletar suas informações para acelerar o processo do seu atendimento")
     nome = input("Qual seu nome? \n -->")
     convenio = forca_opcao("Qual é o seu convênio?", seguros)
-
-    espera_cadastro["nome"] = nome
-    espera_cadastro["convenio"] = convenio
-
+    espera_cadastro["nome"],espera_cadastro["convenio"] = nome, convenio
     print(f"Obrigado, {nome}. Aguarde, você será chamado pelo atendente.")
     while True:
         acao = forca_opcao("O que deseja fazer?", acoes_paciente.keys())
@@ -163,7 +152,7 @@ acoes_funcionario = {
     "sair": sair
 }
 acoes_paciente = {
-    "ver fila": retrieve_line_user,
+    "ver fila": retrieve_line_paciente,
     "sair": sair
 }
 while True:
