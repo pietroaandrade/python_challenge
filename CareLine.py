@@ -1,11 +1,13 @@
-# Importante: Criar funcao de urgencia para triagem
-# Importante: Criar funcao de temperatura para urgencia
 # Importante: Funcao mensagem com funcionario
 # Importante: Funcao acessar mensagem paciente
-# Importante: update create_patient() para nome e convenio manual
 
+# Importante: Criar funcao de urgencia para triagem
+
+# Importante: logar como paciente ou cadastrar
+# Importante: Get_patient shows espera_list
+# Importante: como espera guarda info
+# if else paciente na urgencia para display de pacientes restantes
 from pydantic import BaseModel, ValidationError
-
 
 class PatientData(BaseModel):
     name: str          
@@ -13,7 +15,6 @@ class PatientData(BaseModel):
     symptoms: str
     temperature: int
 
-next_id = 1
 espera_cadastro = {
     "nome": "",
     "convenio": ""
@@ -24,8 +25,11 @@ patients = {
 
 seguros = ["porto seguro", "bradesco", "amil", "sulamérica", "unimed"]
 
-espera = []
+espera_comum = []
 
+espera_urgencia = []
+
+next_id = 1
 
 def forca_opcao(msg, lista_opcoes, msg_erro='Inválido'):
     opcoes = '\n'.join(lista_opcoes)
@@ -60,6 +64,11 @@ def print_patient(id, dic):
 🌡️ Temperatura: {data['temperature']}ºC
 """)
 
+def avaliar_prioridade(temp):
+    if temp <= 35 or temp >= 39:
+        return "urgente"
+    return "comum"
+
 def create_patient():
     global next_id
     if any(valor == "" for valor in espera_cadastro.values()):
@@ -78,6 +87,10 @@ def create_patient():
     name_input, insurance_input = espera_cadastro["nome"], espera_cadastro["convenio"]
     symptoms_input = input("Sintomas do paciente: ")
     temp_input = forca_num("Temperatura paciente: ")
+    urgencia = forca_opcao("Qual é a situação do paciente?", ['urgente','comum'])
+    urgencia = avaliar_prioridade(temp_input)
+    print(f"Classificação automática: Paciente considerado '{urgencia.upper()}' com temperatura de {temp_input}°C.")
+
     
     try:
         patient_data = PatientData(
@@ -90,11 +103,15 @@ def create_patient():
             **patient_data.model_dump(),
             "report" : {"Laudo": "", "Receita": "", "Mensagem": ""}
         }
-        espera.append((patients[id_input]["name"], id_input))
+        if urgencia == "urgente":
+            espera_urgencia.append((patients[id_input]["name"], id_input))
+        else:
+            espera_comum.append((patients[id_input]["name"], id_input))
         print("Patient added successfully!")
         print_patient(id_input, patients)
         for key in espera_cadastro.keys():
             espera_cadastro[key] = ""
+    
 
     except ValidationError as e:
         print("Invalid data:", e)
@@ -132,8 +149,8 @@ def access_report():
         print("Paciente não encontrado.")
         return
     report = patients[id]["report"]
-    if report["Laudo"] == "" and report["Receita"] == "" and report["Mensagem"] == "":
-        print("⚠O relatório ainda não foi preenchido. Aguarde o atendimento.")
+    if any(value =="" for value in patients[id][report].value()):
+        print("O relatório ainda não foi preenchido. Aguarde o atendimento.")
         return
     print(f"""
 📄 Relatório Médico do Paciente {patients[id]['name']}:
@@ -144,30 +161,40 @@ def access_report():
     return
 
 def retrieve_line_funcionario():
-    if not espera:
+    
+    if not espera_comum and not espera_urgencia:
         print("Não há pacientes na fila de espera.")
-        return None
-    proximo_paciente = espera.pop(0)
+        return
+    if len(espera_urgencia) > 0:
+        proximo_paciente = espera_urgencia.pop(0)
+    else:
+        proximo_paciente = espera_comum.pop(0)
+
     nome, id = proximo_paciente
     print(f"Chamando o próximo paciente da fila:")
     print(f"🟢 Nome: {nome}\n🩺 Numero: {id}")
-    print(f"Pacientes restantes na fila: {len(espera)}")
+    print(f"Pacientes restantes na fila: {len(espera_comum) + len(espera_urgencia)}")
+    
 
     return proximo_paciente
-
 
 def retrieve_line_paciente():
-    if not espera:
-        print("Não Há pacientes cadastrados para a fila de espera. Aguarde ser chamado pela triagem.")
+    if not espera_comum and not espera_urgencia:
+        print("Não há pacientes cadastrados na fila de espera. Aguarde ser chamado pela triagem.")
         return None
 
+    elif espera_urgencia:
+        nome, id = espera_urgencia[0]
+        fila = espera_urgencia
     else:
-        proximo_paciente = espera
-        nome, id = proximo_paciente
-        print(f"🟢 Próximo paciente da fila \n --> Numero: {id}")
-        print(f"Pacientes restantes na fila: {len(espera)}")
+        nome, id = espera_comum[0]
+        fila = espera_comum
 
-    return proximo_paciente
+    print(f"🟢 Próximo paciente da fila:\n --> Nome: {nome}\n --> Número: {id}")
+    print(f"Pacientes restantes na fila: {len(fila)}")
+
+    return (nome, id)
+
 
 
 def sair():
@@ -185,7 +212,7 @@ def menu_funcionario():
 
 def menu_paciente():
     print("Bem vindo à CareLine, vamos coletar suas informações para acelerar o processo do seu atendimento")
-    nome = input("Qual seu nome? \n -->")
+    nome = forca_input("Qual seu nome? \n -->")
     convenio = forca_opcao("Qual é o seu convênio?", seguros)
     espera_cadastro["nome"],espera_cadastro["convenio"] = nome, convenio
     print(f"Obrigado, {nome}. Aguarde, você será chamado pelo atendente.")
@@ -210,8 +237,7 @@ acoes_paciente = {
 }
 while True:
     print('Iniciando sistema CareLine')
-    print(f"[DEBUG] Pacientes salvos: {patients}")
-    user_type = forca_opcao("Qual seu papel?", ["funcionario", "paciente", "encerrar sistema"])
+    user_type = forca_opcao("Qual seu papel?", ["funcionario", "paciente", "sair"])
     if user_type == "funcionario":
         menu_funcionario()
     elif user_type == "paciente":
