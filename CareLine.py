@@ -1,12 +1,9 @@
 # Importante: Funcao mensagem com funcionario
 # Importante: Funcao acessar mensagem paciente
-
-# Importante: Criar funcao de urgencia para triagem
-
 # Importante: logar como paciente ou cadastrar
 # Importante: Get_patient shows espera_list
-# Importante: como espera guarda info
 # if else paciente na urgencia para display de pacientes restantes
+
 from pydantic import BaseModel, ValidationError
 
 class PatientData(BaseModel):
