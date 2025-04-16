@@ -1,9 +1,8 @@
 # Importante: Criar funcao de urgencia para triagem
 # Importante: Criar funcao de temperatura para urgencia
-
-# Importante: Criar funcao de Criar laudo
-# importante: criar funcao de acessar laudo
-
+# Importante: Funcao mensagem com funcionario
+# Importante: Funcao acessar mensagem paciente
+# Importante: update create_patient() para nome e convenio manual
 
 from pydantic import BaseModel, ValidationError
 
@@ -63,15 +62,23 @@ def print_patient(id, dic):
 
 def create_patient():
     global next_id
-    for key in espera_cadastro.keys():
-        if espera_cadastro[key] == "":
-            print("Nenhum dado do paciente disponível. Aguarde o paciente preencher o nome e convênio.")
+    if any(valor == "" for valor in espera_cadastro.values()):
+        print("Nenhum dado do paciente disponível.")
+        resposta = forca_opcao("Gostaria de preencher o cadastro do paciente manualmente?", ["sim","nao"])
+        if resposta == "nao":
+            print("Aguarde o paciente preencher o nome e convênio.")
             return
+        else:
+            espera_cadastro["nome"] = input("Enter Name: ")
+            espera_cadastro["convenio"] = forca_opcao("Qual é o seu convênio?", seguros)
+                
     id_input = next_id
     next_id += 1
+
     name_input, insurance_input = espera_cadastro["nome"], espera_cadastro["convenio"]
     symptoms_input = input("Sintomas do paciente: ")
     temp_input = forca_num("Temperatura paciente: ")
+    
     try:
         patient_data = PatientData(
             name=name_input,
@@ -188,10 +195,6 @@ def menu_paciente():
         if resultado == "sair":
             break
     return
-
-
-
-
 
 acoes_funcionario = {
     "cadastrar paciente": create_patient,
