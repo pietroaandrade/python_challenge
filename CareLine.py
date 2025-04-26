@@ -1,9 +1,8 @@
 # Importante: Funcao mensagem com funcionario
 # Importante: Funcao acessar mensagem paciente
-# Importante: logar como paciente ou cadastrar
-# Importante: Get_patient shows espera_list
-# if else paciente na urgencia para display de pacientes restantes
 
+
+from datetime import datetime
 from pydantic import BaseModel, ValidationError
 
 class PatientData(BaseModel):
@@ -19,6 +18,15 @@ espera_cadastro = {
 
 patients = {
 }
+next_id = 1
+
+
+
+chat = {
+
+}
+
+
 
 seguros = ["porto seguro", "bradesco", "amil", "sulamérica", "unimed"]
 
@@ -26,7 +34,8 @@ espera_comum = []
 
 espera_urgencia = []
 
-next_id = 1
+
+
 
 def forca_opcao(msg, lista_opcoes, msg_erro='Inválido'):
     opcoes = '\n'.join(lista_opcoes)
@@ -61,34 +70,44 @@ def print_patient(id, dic):
 🌡️ Temperatura: {data['temperature']}ºC
 """)
 
-def avaliar_prioridade(temp):
-    if temp <= 35 or temp >= 39:
-        return "urgente"
-    return "comum"
+
 
 def create_patient():
     global next_id
-    if any(valor == "" for valor in espera_cadastro.values()):
+    cadastro_manual = False
+
+
+
+    if any(valor == "'" for valor in espera_cadastro.values()):
         print("Nenhum dado do paciente disponível.")
-        resposta = forca_opcao("Gostaria de preencher o cadastro do paciente manualmente?", ["sim","nao"])
+        resposta = forca_opcao("Gostaria de preencher o cadastro do paciente manualmente?", ["sim", "nao"])
         if resposta == "nao":
             print("Aguarde o paciente preencher o nome e convênio.")
             return
         else:
-            espera_cadastro["nome"] = input("Enter Name: ")
-            espera_cadastro["convenio"] = forca_opcao("Qual é o seu convênio?", seguros)
-                
+            espera_cadastro["nome"] = input("Digite o nome do paciente: ")
+            espera_cadastro["convenio"] = forca_opcao("Qual é o convênio do paciente?", seguros)
+            cadastro_manual = True
+
+
+    name_input = espera_cadastro["nome"]
+    insurance_input = espera_cadastro["convenio"]
     id_input = next_id
     next_id += 1
 
-    name_input, insurance_input = espera_cadastro["nome"], espera_cadastro["convenio"]
-    symptoms_input = input("Sintomas do paciente: ")
-    temp_input = forca_num("Temperatura paciente: ")
-    urgencia = forca_opcao("Qual é a situação do paciente?", ['urgente','comum'])
-    urgencia = avaliar_prioridade(temp_input)
+    if not cadastro_manual:
+        print("\nPaciente aguardando na fila de cadastro:")
+        print(f"👤 Nome: {name_input}")
+        print(f"🏥 Convênio: {insurance_input}")
+
+
+    symptoms_input = input("Descreva os sintomas do paciente: ")
+    temp_input = forca_num("Temperatura do paciente (°C): ")
+    urgencia = forca_opcao("Classificação de urgência do paciente:", ['urgente', 'comum'])
+
     print(f"Classificação automática: Paciente considerado '{urgencia.upper()}' com temperatura de {temp_input}°C.")
 
-    
+
     try:
         patient_data = PatientData(
             name=name_input,
@@ -98,21 +117,27 @@ def create_patient():
         )
         patients[id_input] = {
             **patient_data.model_dump(),
-            "report" : {"Laudo": "", "Receita": "", "Mensagem": ""}
+            "report": {"Laudo": "", "Receita": "", "Mensagem": ""}
         }
+
+        # Adiciona na fila correta
         if urgencia == "urgente":
             espera_urgencia.append((patients[id_input]["name"], id_input))
         else:
             espera_comum.append((patients[id_input]["name"], id_input))
-        print("Patient added successfully!")
+
+        print("Paciente adicionado com sucesso!")
         print_patient(id_input, patients)
+
+        # Limpa o cadastro temporário para o próximo paciente
         for key in espera_cadastro.keys():
             espera_cadastro[key] = ""
-    
 
     except ValidationError as e:
-        print("Invalid data:", e)
+        print("Erro nos dados:", e)
+
     return
+
 
 def get_patient():
     while True:
@@ -146,7 +171,7 @@ def access_report():
         print("Paciente não encontrado.")
         return
     report = patients[id]["report"]
-    if any(value =="" for value in patients[id][report].value()):
+    if any(value =="" for value in report.values()):
         print("O relatório ainda não foi preenchido. Aguarde o atendimento.")
         return
     print(f"""
@@ -193,6 +218,39 @@ def retrieve_line_paciente():
     return (nome, id)
 
 
+def message():
+    tipo_mensagem = forca_opcao("Sobre o que sua mensagem está recorrendo?", ["urgencia", "espera", "feedback"])
+
+    if tipo_mensagem == "urgencia":
+        print("Você selecionou URGÊNCIA.")
+    elif tipo_mensagem == "espera":
+        print("Você selecionou ESPERA.")
+    else:
+        print("Você selecionou FEEDBACK.")
+
+        while True:
+            patient_id = forca_num("Qual seu ID para enviar a mensagem? ")
+            if patient_id not in patients:
+                print("Paciente não encontrado. Tente novamente.")
+                continue
+            break
+
+        descricao = forca_input("Descreva sua situação:\n--> ")
+
+        if patient_id not in chat:
+            chat[patient_id] = []
+
+        chat[patient_id].append({
+            "tipo": tipo_mensagem,
+            "descricao": descricao,
+            "hora": datetime.now().strftime("%H:%M")
+        })
+
+        print("Mensagem enviada com sucesso para avaliação!")
+        print(f"\nResumo da mensagem:\nTipo: URGÊNCIA\nDescrição: {descricao}\nHorário: {chat[patient_id][-1]['hora']}")
+
+    return
+
 
 def sair():
     print("Saindo do menu atual...\n")
@@ -208,11 +266,13 @@ def menu_funcionario():
 
 
 def menu_paciente():
-    print("Bem vindo à CareLine, vamos coletar suas informações para acelerar o processo do seu atendimento")
-    nome = forca_input("Qual seu nome? \n -->")
-    convenio = forca_opcao("Qual é o seu convênio?", seguros)
-    espera_cadastro["nome"],espera_cadastro["convenio"] = nome, convenio
-    print(f"Obrigado, {nome}. Aguarde, você será chamado pelo atendente.")
+    paciente_user = forca_opcao("O que deseja fazer?", ["cadastro", "outro"])
+    if paciente_user == "cadastro":
+        print("Bem vindo à CareLine, vamos coletar suas informações para acelerar o processo do seu atendimento")
+        nome = forca_input("Qual seu nome? \n -->")
+        convenio = forca_opcao("Qual é o seu convênio?", seguros)
+        espera_cadastro["nome"],espera_cadastro["convenio"] = nome, convenio
+        print(f"Obrigado, {nome}. Aguarde, você será chamado pelo atendente.")
     while True:
         acao = forca_opcao("\nO que deseja fazer?", acoes_paciente.keys())
         resultado = acoes_paciente[acao]()
@@ -230,6 +290,7 @@ acoes_funcionario = {
 acoes_paciente = {
     "ver fila": retrieve_line_paciente,
     "ver diagnostico" : access_report,
+    "enviar mensagem" : message,
     "sair": sair
 }
 while True:
