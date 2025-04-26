@@ -242,4 +242,3 @@ while True:
     else:
         print("Encerrando sistema...")
         break
-
