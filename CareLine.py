@@ -57,6 +57,25 @@ def forca_input(msg):
         print("Campo obrigatório. Por favor, preencha.")
         resposta = input(msg).strip()
     return resposta
+def get_id(msg, dic):
+    while True:
+        patient_id = forca_num(msg)
+        if patient_id not in dic:
+            print("Paciente não encontrado.")
+            if not continuar_loop():
+                return None
+            continue
+        else:
+            return patient_id
+def continuar_loop():
+    while True:
+        resposta = input("Deseja continuar? (s/n): ").lower()
+        if resposta == 's':
+            return True
+        elif resposta == 'n':
+            return False
+        else:
+            print("Resposta inválida. Digite 's' para sim ou 'n' para não.")
 
 
 def print_patient(id, dic):
@@ -76,9 +95,7 @@ def create_patient():
     global next_id
     cadastro_manual = False
 
-
-
-    if any(valor == "'" for valor in espera_cadastro.values()):
+    if any(valor == "" for valor in espera_cadastro.values()):
         print("Nenhum dado do paciente disponível.")
         resposta = forca_opcao("Gostaria de preencher o cadastro do paciente manualmente?", ["sim", "nao"])
         if resposta == "nao":
@@ -105,7 +122,6 @@ def create_patient():
     temp_input = forca_num("Temperatura do paciente (°C): ")
     urgencia = forca_opcao("Classificação de urgência do paciente:", ['urgente', 'comum'])
 
-    print(f"Classificação automática: Paciente considerado '{urgencia.upper()}' com temperatura de {temp_input}°C.")
 
 
     try:
@@ -120,7 +136,7 @@ def create_patient():
             "report": {"Laudo": "", "Receita": "", "Mensagem": ""}
         }
 
-        # Adiciona na fila correta
+
         if urgencia == "urgente":
             espera_urgencia.append((patients[id_input]["name"], id_input))
         else:
@@ -129,7 +145,7 @@ def create_patient():
         print("Paciente adicionado com sucesso!")
         print_patient(id_input, patients)
 
-        # Limpa o cadastro temporário para o próximo paciente
+
         for key in espera_cadastro.keys():
             espera_cadastro[key] = ""
 
@@ -140,37 +156,32 @@ def create_patient():
 
 
 def get_patient():
-    while True:
-        id = forca_num("Qual é o ID do paciente desejado?")
-        if id not in patients:
-            print("Paciente não encontrado")
-            continue
-        print_patient(id, patients)
+    patient_id = get_id("Qual o ID do paciente que quer buscar?", patients)
+    if patient_id is None:
+        return
+    print_patient(patient_id, patients)
     return
 
 def create_report():
-    id = forca_num("Qual é o ID do paciente desejado?")
-    if id not in patients:
-        print("Paciente não encontrado")
-        create_report()
-    else:
-        print(f"\nPreenchendo relatório do paciente {patients[id]['name']}:")
+    patient_id = get_id("Qual o ID do paciente que quer fazer o laudo?", patients)
+    if patient_id is None:
+        return
+    print(f"\nPreenchendo relatório do paciente {patients[patient_id]['name']}:")
         
-        laudo = forca_input("Insira o laudo do paciente: \n -->")
-        receita = forca_input("Insira a receita do paciente: \n -->")
-        mensagem = forca_input("Insira a descrição: \n -->")
+    laudo = forca_input("Insira o laudo do paciente: \n -->")
+    receita = forca_input("Insira a receita do paciente: \n -->")
+    mensagem = forca_input("Insira a descrição: \n -->")
 
-        patients[id]["report"]["Laudo"] = laudo
-        patients[id]["report"]["Receita"] = receita
-        patients[id]["report"]["Mensagem"] = mensagem
+    patients[patient_id]["report"]["Laudo"] = laudo
+    patients[patient_id]["report"]["Receita"] = receita
+    patients[patient_id]["report"]["Mensagem"] = mensagem
     return
 
 def access_report():
-    id = forca_num("Digite seu número de paciente para ver o relatório: ")
-    if id not in patients:
-        print("Paciente não encontrado.")
+    patient_id = get_id("Qual o seu ID de paciente acessar o seu laudo o relatório?", patients)
+    if patient_id is None:
         return
-    report = patients[id]["report"]
+    report = patients[patient_id]["report"]
     if any(value =="" for value in report.values()):
         print("O relatório ainda não foi preenchido. Aguarde o atendimento.")
         return
@@ -219,36 +230,54 @@ def retrieve_line_paciente():
 
 
 def message():
-    tipo_mensagem = forca_opcao("Sobre o que sua mensagem está recorrendo?", ["urgencia", "espera", "feedback"])
+    tipo_mensagem = forca_opcao("Sobre o que sua mensagem está recorrendo?", ["urgencia", "pergunta", "feedback"])
 
     if tipo_mensagem == "urgencia":
         print("Você selecionou URGÊNCIA.")
     elif tipo_mensagem == "espera":
-        print("Você selecionou ESPERA.")
+        print("Você selecionou PERGUNTA.")
     else:
         print("Você selecionou FEEDBACK.")
 
-        while True:
-            patient_id = forca_num("Qual seu ID para enviar a mensagem? ")
-            if patient_id not in patients:
-                print("Paciente não encontrado. Tente novamente.")
-                continue
-            break
+    patient_id = get_id("Qual seu ID de paciente para enviar a mensagem?", patients)
+    if patient_id is None:
+        return
+    descricao = forca_input("Descreva sua situação:\n--> ")
 
-        descricao = forca_input("Descreva sua situação:\n--> ")
+    if patient_id not in chat:
+        chat[patient_id] = []
 
-        if patient_id not in chat:
-            chat[patient_id] = []
-
-        chat[patient_id].append({
+    chat[patient_id].append({
             "tipo": tipo_mensagem,
             "descricao": descricao,
             "hora": datetime.now().strftime("%H:%M")
-        })
+    })
 
-        print("Mensagem enviada com sucesso para avaliação!")
-        print(f"\nResumo da mensagem:\nTipo: URGÊNCIA\nDescrição: {descricao}\nHorário: {chat[patient_id][-1]['hora']}")
+    print("Mensagem enviada com sucesso para avaliação!")
+    print(f"\nPaciente: {patients[patient_id]['name']}\nTipo: {tipo_mensagem}\nDescrição: {descricao}\nHorário: {chat[patient_id][-1]['hora']}")
+    return
 
+
+def retrieve_messages():
+    print("\n📨 Acessar Mensagens")
+    print("-" * 30)
+    patient_id = get_id("Qual seu ID de paciente para ver suas mensagens?", chat)
+    if patient_id is None:
+        print("\nNenhuma mensagem para exibir. Voltando ao menu...")
+        return
+
+    if not chat[patient_id]:
+        print("\nNenhuma mensagem enviada ainda.")
+        return
+
+    print(f"\n📋 Chat do paciente ID {patient_id}:")
+    for i in range(len(chat[patient_id])):
+        print(f"""
+📝 Mensagem {i+1}
+• Tipo: {message['tipo']}
+• Descrição: {message['descricao']}
+• Horário: {message['hora']}
+        """)
     return
 
 
@@ -291,6 +320,7 @@ acoes_paciente = {
     "ver fila": retrieve_line_paciente,
     "ver diagnostico" : access_report,
     "enviar mensagem" : message,
+    "ver mensagem" : retrieve_messages,
     "sair": sair
 }
 while True:
