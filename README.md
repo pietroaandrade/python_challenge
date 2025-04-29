@@ -50,14 +50,14 @@ CareLine é um sistema desenvolvido para melhorar o **atendimento e a comunicaç
 - Menu interativo com `loop`
 - Estrutura modular e reutilizável
 
-## 📦 Requisitos Técnicos
+## Requisitos Técnicos
 - Biblioteca `pydantic`
 
 Instale com:
 ```bash
 pip install pydantic
 ```
-## 👤 Integrantes
+## Integrantes
 
 | Nome                            | RM       |
 |---------------------------------|----------|
