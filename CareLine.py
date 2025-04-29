@@ -1,7 +1,3 @@
-# Importante: Funcao mensagem com funcionario
-# Importante: Funcao acessar mensagem paciente
-
-
 from datetime import datetime
 from pydantic import BaseModel, ValidationError
 
@@ -272,6 +268,7 @@ def retrieve_messages():
 
     print(f"\n📋 Chat do paciente ID {patient_id}:")
     for i in range(len(chat[patient_id])):
+        message = chat[patient_id][i]
         print(f"""
 📝 Mensagem {i+1}
 • Tipo: {message['tipo']}
