@@ -15,23 +15,11 @@ espera_cadastro = {
 patients = {
 }
 next_id = 1
-
-
-
 chat = {
-
 }
-
-
-
 seguros = ["porto seguro", "bradesco", "amil", "sulamérica", "unimed"]
-
 espera_comum = []
-
 espera_urgencia = []
-
-
-
 
 def forca_opcao(msg, lista_opcoes, msg_erro='Inválido'):
     opcoes = '\n'.join(lista_opcoes)

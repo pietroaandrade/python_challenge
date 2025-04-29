@@ -39,9 +39,16 @@ CareLine é um sistema desenvolvido para melhorar o **atendimento e a comunicaç
 
 ## 🖼️ Fluxo de Funcionamento
 
-![Fluxograma do sistema](fluxograma.png)
+![Fluxograma do sistema](fluxograma-careline.png)
 
 ---
+## Tecnologias utilizadas
+
+- Python 3.11+
+- Pydantic
+- Estruturas de dados básicas (`dict`, `list`, `queue`)
+- Menu interativo com `loop`
+- Estrutura modular e reutilizável
 
 ## 📦 Requisitos Técnicos
 - Biblioteca `pydantic`
@@ -49,3 +56,13 @@ CareLine é um sistema desenvolvido para melhorar o **atendimento e a comunicaç
 Instale com:
 ```bash
 pip install pydantic
+```
+## 👤 Integrantes
+
+| Nome                            | RM       |
+|---------------------------------|----------|
+| Pietro Brandalide De Andrade    | RM560142 |
+| Ícaro Henrique de Souza Calixto | RM560278 |
+| Caio Costa Beraldo              | RM560775 |
+| Victor Kenzo Mikado             | RM560142 |
+
