@@ -1,6 +1,6 @@
 # 🏥 CareLine - Sistema de Atendimento Hospitalar
 
-CareLine é um sistema desenvolvido para melhorar o **atendimento e a comunicação** entre pacientes e a equipe assistencial no Hospital Sabará. O sistema têm como pricipais funcionalidades A possibiliddade de ver a fila de espera e mandar mensagens em tempo real aos funcionarios por parte do paciente, também automatiza processos como cadastro, triagem por urgência, emissão de relatórios médicos e envio de mensagens.
+CareLine é um sistema desenvolvido para melhorar o **atendimento e a comunicação** entre pacientes e a equipe assistencial no Hospital Sabará. O sistema têm como pricipais funcionalidades: Ver a fila de espera, mandar mensagens em tempo real, também automatiza processos como cadastro, triagem por urgência, emissão de relatórios médicos e envio de mensagens.
 
 ## Objetivos do Projeto
 
