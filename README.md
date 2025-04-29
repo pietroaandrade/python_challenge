@@ -57,6 +57,9 @@ Instale com:
 ```bash
 pip install pydantic
 ```
+## Video Apresentação e Demonstração
+https://www.youtube.com/watch?v=PMhH0-Y2P0o
+
 ## Integrantes
 
 | Nome                            | RM       |
