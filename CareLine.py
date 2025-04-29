@@ -280,6 +280,26 @@ def retrieve_messages():
         """)
     return
 
+def retrieveMessage_funcionario():
+    total = sum(len(chat[id]) for id in chat)
+    print(f"📨 Você tem {total} mensagem(ns) no sistema.")
+
+    filtro = forca_opcao("Qual o tipo de mensagem deseja ver?", ["urgencia", "espera", "feedback"])
+
+    encontrou = False
+    for id_paciente, mensagens in chat.items():
+        for mensagem in mensagens:
+            if mensagem["tipo"] == filtro:
+                encontrou = True
+                print(f"""
+📬 Nova mensagem de {patients[id_paciente]['name']} (ID {id_paciente})
+🕒 Hora: {mensagem['hora']}
+📌 Tipo: {mensagem['tipo'].capitalize()}
+📝 Conteúdo: {mensagem['descricao']}
+""")
+    return
+
+
 
 def sair():
     print("Saindo do menu atual...\n")
@@ -314,6 +334,7 @@ acoes_funcionario = {
     "buscar paciente": get_patient,
     "chamar paciente": retrieve_line_funcionario,
     "diagnostico" : create_report,
+    "ver mensagens" : retrieveMessage_funcionario,
     "sair": sair
 }
 acoes_paciente = {
