@@ -69,6 +69,7 @@ pip install pydantic
 ```
 ## Video Apresentação e Demonstração
 https://www.youtube.com/watch?v=PMhH0-Y2P0o
+
 https://www.youtube.com/watch?v=YLjhIoHa4CY
 
 ## Integrantes
