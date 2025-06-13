@@ -49,6 +49,7 @@ CareLine é um sistema desenvolvido para melhorar o **atendimento e a comunicaç
 - Estruturas de dados básicas (`dict`, `list`, `queue`)
 - Menu interativo com `loop`
 - Estrutura modular e reutilizável
+- JSON
 
 ## Requisitos Técnicos
 - Biblioteca `pydantic`
