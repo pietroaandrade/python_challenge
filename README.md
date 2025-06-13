@@ -18,6 +18,7 @@ CareLine é um sistema desenvolvido para melhorar o **atendimento e a comunicaç
 - Visualização da fila e sua posição.
 - Acesso ao laudo médico e receita.
 - Envio de mensagens à equipe (urgência, dúvidas, feedback).
+- Sistema de alerta quando novos resultados estão disponíveis
 
 ### 👨‍⚕️ Funcionário
 - Cadastro completo de pacientes com classificação de urgência.
@@ -34,6 +35,14 @@ CareLine é um sistema desenvolvido para melhorar o **atendimento e a comunicaç
 - Dicionários principais: `patients` e `chat`.
 - Menus interativos para paciente e funcionário.
 - Funções reutilizáveis com validação de inputs.
+
+---
+
+## Sistemas de Armazenamentos
+
+- patients.json: Dados cadastrais + histórico
+- fila_comum.json e fila_urgencia.json : Quantidade de pessoas em cada fila
+- chat.json: Armazenamento de mensagens
 
 ---
 
